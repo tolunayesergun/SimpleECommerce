@@ -6,5 +6,5 @@ Adminer
 
 RabbitMq
     http://localhost:15672/#/
-    username: user
-    password: bitname
+    username: guest
+    password: guest

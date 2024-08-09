@@ -1,3 +1,5 @@
+using Core.Models.Events;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Order.Api.Controllers
@@ -6,28 +8,24 @@ namespace Order.Api.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
+        private readonly IPublishEndpoint _publish;
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPublishEndpoint publish)
         {
             _logger = logger;
+            _publish = publish;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet]
+        public async Task<IActionResult> Post()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+
+            var order = new CreatedOrderModel { Id = 1, Name = "deneme" };
+
+
+            await _publish.Publish<CreatedOrderModel>(order);
+            return Ok("Gönderdiðiniz ürün tarafýmýza ulaþmýþ ve gerekli iþlemler gerçekleþtirilmiþtir. Ýlginiz için teþekkür ederiz.");
         }
     }
 }
