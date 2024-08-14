@@ -1,11 +1,33 @@
+using Core.Data.Abstracts;
+using Core.Data;
+using Core.Models.Constants;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Stock.Api.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddDbContext<StockDbContext>(opt => opt.UseNpgsql(builder.Configuration.GetConnectionString("StockDBConnection")));
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IDbContext, StockDbContext>();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((ctx, cfg) =>
+    {
+        cfg.Host(RabbitMqConstants.Host, "/", c =>
+        {
+            c.Username(RabbitMqConstants.Username);
+            c.Password(RabbitMqConstants.Password);
+        });
+    });
+});
+
+
 
 var app = builder.Build();
 

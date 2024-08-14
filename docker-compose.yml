@@ -7,6 +7,10 @@ services:
     shm_size: 128mb
     environment:
       POSTGRES_PASSWORD: example
+    volumes:
+            - pgdata:/var/lib/postgresql/data/
+    ports:
+      - '5432:5432'
   adminer:
     image: adminer
     restart: always
@@ -22,17 +26,34 @@ services:
       dockerfile: ./src/Stock/Stock.Api/Dockerfile
     ports: 
       - '8001:8080'
+    depends_on:
+      - rabbitmq
+      - db
   stock-consumer:
     build:
       dockerfile: ./src/Stock/Stock.Consumer/Dockerfile
+    depends_on:
+      - rabbitmq
+      - db      
   order-api:
     build:
       dockerfile: ./src/Order/Order.Api/Dockerfile
     ports: 
-      - '8002:8080'  
+      - '8002:8080'
+    depends_on:
+      - rabbitmq
+      - db        
   order-consumer:
     build:
       dockerfile: ./src/Order/Order.Consumer/Dockerfile
+    depends_on:
+      - rabbitmq
+      - db      
   notification-consumer:
     build:
-      dockerfile: ./src/Notification/Notification.Consumer/Dockerfile                          
+      dockerfile: ./src/Notification/Notification.Consumer/Dockerfile 
+    depends_on:
+      - rabbitmq
+      - db                               
+volumes:
+    pgdata:
