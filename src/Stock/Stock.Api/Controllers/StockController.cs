@@ -27,24 +27,15 @@ namespace Stock.Api.Controllers
 
             var existStock = _repository.FindBy(x => x.ProductId == stockDetail.ProductId).FirstOrDefault();
 
-            if (existStock != null)
+            var stockModel = new StockModel
             {
-                existStock.TotalCount += stockDetail.TotalCount;
-                existStock.UpdatedDate = DateTime.Now;
-                _repository.Update(existStock);
-            }
-            else
-            {
-                var stockModel = new StockModel
-                {
-                    ProductId = stockDetail.ProductId,
-                    TotalCount = stockDetail.TotalCount,
-                    CreatedDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow,
-                };
+                ProductId = stockDetail.ProductId,
+                TotalCount = stockDetail.TotalCount,
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = DateTime.UtcNow,
+            };
 
-                _repository.Add(stockModel);
-            }
+            _repository.Add(stockModel);
 
             await _unitOfWork.CommitAsync();
 
